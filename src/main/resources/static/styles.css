@@ -1,0 +1,70 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#main-body {
+    width: 95vw;
+    height: 95vh;
+    margin: 20px auto;
+}
+
+/* Styling of area where messages are displayed */
+
+#messages {
+    display: flex;
+    padding: 20px;
+    padding-top: 0;
+    flex-direction: column;
+    border: 2px solid rgb(128, 128, 128, 0.2);
+    width: inherit;
+    height: 87.5vh;
+    overflow-y: scroll;
+}
+
+.message {
+    min-height: 30px;
+    overflow: hidden;
+    padding: 10px;
+    border-top: 2px solid rgb(128, 128, 128, 0.2);
+    vertical-align: middle;
+}
+
+/* Styling of area where messages are sent */
+
+
+#send-msg-area {
+    position: fixed;
+    width: inherit;
+    min-height: 7.5vh;
+    bottom: 2.5vh;
+    padding: 1vh;
+    display: flex;
+    border: 2px solid rgb(128, 128, 128, 0.2);
+}
+
+#input-msg {
+    flex-grow: 1;
+    margin-right: 10px;
+    border: 0 none;
+    outline: none;
+    min-height: 5vh;
+    resize: none;
+    background-color: rgba(211, 211, 211, 0.888);
+}
+
+#send-msg-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    align-self: center;
+}
+
+#send-msg-img {
+    width: 30px;
+    height: 30px;
+    z-index: -1;
+}
