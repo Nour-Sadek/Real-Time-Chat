@@ -24,8 +24,7 @@
 }
 
 .message {
-    min-height: 30px;
-    overflow: hidden;
+    height: auto;
     padding: 10px;
     border-top: 2px solid rgb(128, 128, 128, 0.2);
     vertical-align: middle;
@@ -61,6 +60,7 @@
     border: 0;
     background: transparent;
     align-self: center;
+    cursor: pointer;
 }
 
 #send-msg-img {
