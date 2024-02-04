@@ -23,6 +23,9 @@ public class UserSessionRegistry {
     public void removeSession(WebSocketSession session) {
         userSessionMap.remove(session.getId());
     }
+    public void removeSession(String session) {
+        userSessionMap.remove(session);
+    }
     public boolean hasUser(String userName) {
         for (User user: userSessionMap.values()) {
             if (user.getUserName().equals(userName)) {

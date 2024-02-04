@@ -48,9 +48,9 @@ public class ChatMessageController {
         return chatMessagesRegistry.getChatMessageRegistry();
     }
 
-    @MessageMapping("/app/chat.checkIfUnique")
+    @MessageMapping("/chat.checkIfUnique")
     @SendTo("/topic/continue")
     public boolean isUserUnique(@Payload String userName) {
-        return userSessionRegistry.hasUser(userName);
+        return !userSessionRegistry.hasUser(userName);
     }
 }

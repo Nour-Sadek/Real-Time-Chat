@@ -8,10 +8,9 @@ const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August",
 var stompClient = null;
 var username = null;
 var subscribeObject = null;
+var subscribeObjectLogin = null;
 
-function onMessageReceived(payload) {
-
-    let message = JSON.parse(payload.body);
+function addMessageToChat(message) {
 
     // Getting the content of the message
     let text = message.content;
@@ -19,7 +18,9 @@ function onMessageReceived(payload) {
 
     // Getting the date to display
     let fullDate = new Date(message.timeCreated);
-    let time = fullDate.getHours() + ":" + fullDate.getMinutes();
+    let hours = String(fullDate.getHours()).length == 2 ? fullDate.getHours() : "0" + fullDate.getHours();
+    let minutes = String(fullDate.getMinutes()).length == 2 ? fullDate.getMinutes() : "0" + fullDate.getMinutes();
+    let time = hours + ":" + minutes;
     let day = months[fullDate.getMonth()] + " " + fullDate.getDate();
     let displayedDate = time + " | " + day;
 
@@ -39,6 +40,11 @@ function onMessageReceived(payload) {
     // Make the new message scroll into view if the messagesContainer was full before its addition
     myElement.scrollIntoView({"behavior": "smooth"});
 
+}
+
+function onMessageReceived(payload) {
+    let message = JSON.parse(payload.body);
+    addMessageToChat(message);
 }
 
 function sendMessage(event) {
@@ -73,73 +79,63 @@ function connect(event) {
     userNameArea.value = "";
 
     if (username.length != 0) {
-        loginPage.classList.add('hidden');
-        chatPage.classList.remove('hidden');
-
-        populateUI();
 
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, onConnected);
+
     }
 
 }
 
 function populateUI(payload) {
 
-    if (payload === undefined) return;
+    subscribeObject.unsubscribe();
+
+    if (payload.length == 0) return;
 
     let chatMessages = JSON.parse(payload.body);
-    let count = messagesContainer.childElementCount;
 
-    for (let i = count; i < chatMessages.length; i++) {
+    for (let i = 0; i < chatMessages.length; i++) {
         let message = chatMessages[i];
-
-        // Getting the content of the message
-            let text = message.content;
-            let textWithNewLine = text.replaceAll("\n", "<br/>");  // Allows the display of new line characters in the messages
-
-            // Getting the date to display
-            let fullDate = new Date(message.timeCreated);
-            let time = fullDate.getHours() + ":" + fullDate.getMinutes();
-            let day = months[fullDate.getMonth()] + " " + fullDate.getDate();
-            let displayedDate = time + " | " + day;
-
-            // Getting the user name
-            let user = message.sender;
-
-            // Create the message-container div that contains the other three info (userName, content, and date)
-            let myElement = document.createElement("div");
-            myElement.classList.add("message-container");
-
-            myElement.insertAdjacentHTML("beforeend", `<div class="sender"> ${user} </div>`);
-            myElement.insertAdjacentHTML("beforeend", `<div class="date"> ${displayedDate} </div>`);
-            myElement.insertAdjacentHTML("beforeend", `<div class="message"> ${textWithNewLine} </div>`);
-
-            messagesContainer.append(myElement);
-
-            // Make the new message scroll into view if the messagesContainer was full before its addition
-            myElement.scrollIntoView({"behavior": "smooth"});
-
+        addMessageToChat(message);
     }
 
-    stompClient.unsubscribe(subscribeObject);
+}
 
+function confirmConnection(payload) {
+
+    // Unsubscribe after knowing whether the user is unique
+    subscribeObjectLogin.unsubscribe();
+
+    let isUnique = JSON.parse(payload.body);
+
+    if (isUnique) {
+
+        loginPage.classList.add('hidden');
+        chatPage.classList.remove('hidden');
+
+        let user = {
+            userName: username
+        };
+
+        // Subscribe to the Public Topic
+        stompClient.subscribe('/topic/public', onMessageReceived);
+        // Subscribe to this topic to populate UI with previous messages (for new logins only)
+        subscribeObject = stompClient.subscribe('/topic/previous', populateUI)
+
+        // Add the username to the registry
+        stompClient.send("/app/chat.addUser", {}, JSON.stringify(user));
+
+    }
 }
 
 function onConnected() {
 
-    let user = {
-        userName: username
-    };
-
-    // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/public', onMessageReceived);
-    subscribeObject = stompClient.subscribe('/topic/previous', populateUI)
-
-    // Add the username to the registry
-    stompClient.send("/app/chat.addUser", {}, JSON.stringify(user));
+    // Check if the username is unique
+    subscribeObjectLogin = stompClient.subscribe('/topic/continue', confirmConnection);
+    stompClient.send("/app/chat.checkIfUnique", {}, username);
 
 }
 
