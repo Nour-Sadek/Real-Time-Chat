@@ -9,25 +9,37 @@
 </head>
 <body>
 
-<div id="main-body">
+    <!-- Login page -->
+    <div id="login-page">
+        <div id="login-page-container">
+            <input id="input-username" type="text" maxlength="20" placeholder="Enter username..."/>
+            <button id="send-username-btn"> Send </button>
+        </div>
+    </div>
 
+    <!-- Main Chat room -->
+    <div id="main-body" class="hidden">
 
-    <div id="messages">
+        <!-- Area where previously-sent messages appear -->
+        <div id="messages">
+
+        </div>
+
+        <!-- Area where messages are entered and sent -->
+        <div id="send-msg-area">
+            <textarea id="input-msg" placeholder="Type a message"> </textarea>
+            <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
+        </div>
 
     </div>
 
-    <div id="send-msg-area">
-        <textarea id="input-msg"></textarea>
-        <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
-    </div>
+    <!-- To work with websockets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
+    <script src="./DOM.js"></script>
 
-</div>
-
-<!-- To work with websockets -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-
-<script src="./DOM.js"></script>
 </body>
+
 </html>
+
