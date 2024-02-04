@@ -46,6 +46,13 @@
     cursor: pointer;
 }
 
+#existent-username-alert {
+    font-size: xx-small;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    color: red;
+}
+
 .hidden {
     display: none;
 }

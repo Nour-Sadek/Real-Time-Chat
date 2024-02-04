@@ -2,6 +2,7 @@
 const messagesContainer = document.getElementById("messages");
 const loginPage = document.getElementById("login-page");
 const chatPage = document.getElementById("main-body");
+const alertMessage = document.getElementById("existent-username-alert");
 
 const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August", "Sept", "Oct", "Nov", "Dec"];
 
@@ -113,6 +114,9 @@ function confirmConnection(payload) {
 
     if (isUnique) {
 
+        if (alertMessage.classList.contains('hidden')) {
+            alertMessage.classList.remove('hidden');
+        }
         loginPage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
@@ -128,6 +132,8 @@ function confirmConnection(payload) {
         // Add the username to the registry
         stompClient.send("/app/chat.addUser", {}, JSON.stringify(user));
 
+    } else {
+        alertMessage.classList.remove('hidden');
     }
 }
 
