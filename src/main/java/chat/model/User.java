@@ -1,12 +1,13 @@
 package chat.model;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class User {
 
     private String userName;
-    private List<ChatMessage> chatMessages = Collections.synchronizedList(new ArrayList<>());
+    private Map<String, List<ChatMessage>> chatMessages = new ConcurrentHashMap<>();
 
     public String getUserName() {
         return userName;
@@ -16,11 +17,11 @@ public class User {
         this.userName = userName;
     }
 
-    public List<ChatMessage> getChatMessages() {
+    public Map<String, List<ChatMessage>> getChatMessages() {
         return chatMessages;
     }
 
-    public void setChatMessages(List<ChatMessage> chatMessages) {
+    public void setChatMessages(Map<String, List<ChatMessage>> chatMessages) {
         this.chatMessages = chatMessages;
     }
 }

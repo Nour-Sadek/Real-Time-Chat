@@ -33,7 +33,6 @@ public class ChatMessageController {
         chatMessagesRegistry.registerChatMessage(chatMessage);
         User sender = userSessionRegistry.getUserForSession(sessionId);
         chatMessage.setSender(sender.getUserName());
-        sender.getChatMessages().add(chatMessage);
 
         return chatMessage;
     }
