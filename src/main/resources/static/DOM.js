@@ -3,6 +3,7 @@ const messagesContainer = document.getElementById("messages");
 const loginPage = document.getElementById("login-page");
 const chatPage = document.getElementById("main-body");
 const alertMessage = document.getElementById("existent-username-alert");
+const users = document.getElementById("users");
 
 const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August", "Sept", "Oct", "Nov", "Dec"];
 
@@ -94,6 +95,9 @@ function populateUI(payload) {
 
     subscribeObject.unsubscribe();
 
+    // Subscribe to the Public Topic
+    stompClient.subscribe('/topic/public', onMessageReceived);
+
     if (payload.length == 0) return;
 
     let chatMessages = JSON.parse(payload.body);
@@ -101,6 +105,36 @@ function populateUI(payload) {
     for (let i = 0; i < chatMessages.length; i++) {
         let message = chatMessages[i];
         addMessageToChat(message);
+    }
+
+}
+
+function removeOnlineUser(payload) {
+
+    let disconnectedUser = payload.body;
+
+    if (disconnectedUser) {
+        let allUsersNodeList = document.querySelectorAll(".user");
+        allUsersNodeList.forEach(el => {
+            if (el.textContent.trim() == disconnectedUser) {
+                el.remove();
+            }
+        });
+    }
+
+}
+
+function addOnlineUser(payload) {
+
+    let connectedUsers = JSON.parse(payload.body);
+    connectedUsers = connectedUsers.filter(e => e !== username);
+
+    if (connectedUsers.length != 0) {
+        users.innerHTML = "";
+        for (let i = 0; i < connectedUsers.length; i++) {
+            let connectedUser = connectedUsers[i];
+            users.insertAdjacentHTML("beforeend", `<div class="user"> ${connectedUser} </div>`);
+        }
     }
 
 }
@@ -114,23 +148,23 @@ function confirmConnection(payload) {
 
     if (isUnique) {
 
-        if (alertMessage.classList.contains('hidden')) {
-            alertMessage.classList.remove('hidden');
-        }
         loginPage.classList.add('hidden');
+        chatPage.classList.add('main-chat-room');
         chatPage.classList.remove('hidden');
 
         let user = {
             userName: username
         };
 
-        // Subscribe to the Public Topic
-        stompClient.subscribe('/topic/public', onMessageReceived);
         // Subscribe to this topic to populate UI with previous messages (for new logins only)
         subscribeObject = stompClient.subscribe('/topic/previous', populateUI)
 
         // Add the username to the registry
         stompClient.send("/app/chat.addUser", {}, JSON.stringify(user));
+
+        // Subscribe to topics that update displayed online users
+        stompClient.subscribe('/topic/removeOnlineUser', removeOnlineUser);
+        stompClient.subscribe('/topic/addOnlineUser', addOnlineUser);
 
     } else {
         alertMessage.classList.remove('hidden');
