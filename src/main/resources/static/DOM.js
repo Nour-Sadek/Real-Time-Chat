@@ -4,6 +4,8 @@ const loginPage = document.getElementById("login-page");
 const chatPage = document.getElementById("main-body");
 const alertMessage = document.getElementById("existent-username-alert");
 const users = document.getElementById("users");
+const publicChatButton = document.getElementById("public-chat-btn");
+const chatWithLabel = document.getElementById("chat-with");
 
 const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August", "Sept", "Oct", "Nov", "Dec"];
 
@@ -11,6 +13,40 @@ var stompClient = null;
 var username = null;
 var subscribeObject = null;
 var subscribeObjectLogin = null;
+var publicTopicSubscribeObject = null;
+
+// Add an Event Listener to the publicChatButton
+publicChatButton.addEventListener("click", function(e) {
+    // Check the current status of the button
+    if (this.classList.contains("active-chat")) {
+        return;
+    }
+
+    /* Make the public messages appear */
+
+    // Subscribe to this topic to populate UI with previous messages
+    subscribeObject = stompClient.subscribe('/topic/previous', populateUI);
+
+    // Populate Chat with the public messages
+    stompClient.send("/app/chat.getPublicMessages", {});
+
+    // Change the Chat-With label to Public Chat
+    chatWithLabel.innerHTML = "Public Chat";
+
+    // Change the color of the public chat button to blue
+    publicChatButton.classList.remove("dorment-chat");
+    publicChatButton.classList.add("active-chat");
+
+    // Change the color of all online users to grey
+    let allUsersNodeList = document.querySelectorAll(".user");
+    allUsersNodeList.forEach(el => {
+        if (el.classList.contains("active-chat")) {
+            el.classList.remove("active-chat");
+            el.classList.add("dorment-chat");
+        }
+    });
+
+});
 
 function addMessageToChat(message) {
 
@@ -96,11 +132,12 @@ function populateUI(payload) {
     subscribeObject.unsubscribe();
 
     // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/public', onMessageReceived);
+    publicTopicSubscribeObject = stompClient.subscribe('/topic/public', onMessageReceived);
 
     if (payload.length == 0) return;
 
     let chatMessages = JSON.parse(payload.body);
+    messagesContainer.innerHTML = "";
 
     for (let i = 0; i < chatMessages.length; i++) {
         let message = chatMessages[i];
@@ -133,7 +170,34 @@ function addOnlineUser(payload) {
         users.innerHTML = "";
         for (let i = 0; i < connectedUsers.length; i++) {
             let connectedUser = connectedUsers[i];
-            users.insertAdjacentHTML("beforeend", `<div class="user"> ${connectedUser} </div>`);
+            users.insertAdjacentHTML("beforeend", `<div class="user dorment-chat"> ${connectedUser} </div>`);
+            let newlyAddedUser = users.lastChild;
+            newlyAddedUser.addEventListener("click", function (e) {
+                // Make the public messages container empty
+                messagesContainer.innerHTML = "";
+                // Make the color of all other online users grey
+                let allUsersNodeList = document.querySelectorAll(".user");
+                allUsersNodeList.forEach(el => {
+                    if (el.classList.contains("active-chat")) {
+                        el.classList.remove("active-chat");
+                        el.classList.add("dorment-chat");
+                    }
+                });
+                // Make the color of the Public Chat Button grey
+                if (publicChatButton.classList.contains("active-chat")) {
+                    publicChatButton.classList.remove("active-chat");
+                    publicChatButton.classList.add("dorment-chat");
+                }
+                // Make the color of the chosen user blue
+                if (this.classList.contains("dorment-chat")) {
+                    this.classList.remove("dorment-chat");
+                    this.classList.add("active-chat");
+                }
+                // Change the Chat-With label to the clicked user's username
+                chatWithLabel.innerHTML = this.innerHTML;
+                // Unsubscribe from the public topic
+                publicTopicSubscribeObject.unsubscribe();
+            });
         }
     }
 
@@ -153,7 +217,7 @@ function confirmConnection(payload) {
         chatPage.classList.remove('hidden');
 
         let user = {
-            userName: username
+            userName: username,
         };
 
         // Subscribe to this topic to populate UI with previous messages (for new logins only)

@@ -9,44 +9,54 @@
 </head>
 <body>
 
-    <!-- Login page -->
-    <div id="login-page">
-        <div id="login-page-container">
-            <input id="input-username" type="text"/>
-            <div id="existent-username-alert" class="hidden"> This username has already been taken <br> Please choose another one </div>
-            <button id="send-username-btn"> Send </button>
-        </div>
+<div id="login-page">
+    <div id="login-page-container">
+        <input id="input-username" type="text" placeholder="Enter username..."/>
+        <div id="existent-username-alert" class="hidden"> This username has already been taken <br> Please choose another one </div>
+        <button id="send-username-btn"> Send </button>
     </div>
+</div>
 
-    <!-- Main Chat Room -->
-    <div id="main-body" class="hidden">
+<!-- Main Chat Room -->
+<div id="main-body" class="hidden">
 
-        <!-- Users -->
-        <div id="users"></div>
+    <!-- Users -->
+    <div id="users-and-button">
 
-        <!-- Chat -->
-        <div id="chat">
+        <div class="chatting"> </div>
 
-            <!-- Area where previously-sent messages appear -->
-            <div id="messages"></div>
+        <!-- Area where all online users are displayed -->
+        <div id="users"> </div>
 
-            <!-- Area where messages are entered and sent -->
-            <div id="send-msg-area">
-                <input id="input-msg"></input>
-                <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
-            </div>
-
-        </div>
+        <!-- Button that allows users to switch to Public Chat -->
+        <button id="public-chat-btn" class="active-chat"> Public Chat </button>
 
     </div>
 
-    <!-- To work with websockets -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!-- Chat -->
+    <div id="chat">
 
-    <script src="./DOM.js"></script>
+        <!-- Area where current active chat is shown -->
+        <div id="chat-with" class="chatting"> Public Chat </div>
 
+        <!-- Area where previously-sent messages appear -->
+        <div id="messages"> </div>
+
+        <!-- Area where messages are entered and sent -->
+        <div id="send-msg-area">
+            <textarea id="input-msg"></textarea>
+            <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
+        </div>
+
+    </div>
+
+
+</div>
+
+<!-- To work with websockets -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script src="./DOM.js"></script>
 </body>
-
 </html>
-

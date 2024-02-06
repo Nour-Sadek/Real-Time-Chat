@@ -56,12 +56,16 @@
 
 /* Styling of area where users are shown */
 
+#users-and-button {
+    flex-basis: 25vw;
+}
+
 #users {
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
-    flex-basis: 25vw;
     border: 2px solid rgb(128, 128, 128, 0.2);
+    height: 82.5vh;
 }
 
 .user {
@@ -69,12 +73,39 @@
     vertical-align: middle;
     padding: 15px;
     border-bottom: 2px solid rgb(128, 128, 128, 0.2);
+}
+
+.user:hover {
+    border: 2px solid black;
+}
+
+#public-chat-btn {
+    width: 100%;
+    min-height: 7.5vh;
+    border: 2px solid rgb(128, 128, 128, 0.2);;
+    cursor: pointer;
+}
+
+.active-chat {
+    background-color: rgb(50, 90, 213);
+    color: white;
+}
+
+.dorment-chat {
     background-color: rgb(243, 243, 243, 0.5);
     color: rgb(89, 89, 89);
-
 }
 
 /* Styling of area where messages are displayed */
+
+.chatting {
+    height: 5vh;
+    background-color: rgba(211, 211, 211, 0.5);
+    vertical-align: middle;
+    padding: 10px;
+    text-align: center;
+    color: rgb(89, 89, 89);
+}
 
 #chat {
     flex-grow: 2;
@@ -86,13 +117,13 @@
     padding-top: 0;
     flex-direction: column;
     border: 2px solid rgb(128, 128, 128, 0.2);
-    height: 87.5vh;
+    height: 82.5vh;
     overflow-y: scroll;
 }
 
 .message-container {
     padding: 10px 10px 10px 0px;
-    border-top: 2px solid rgb(128, 128, 128, 0.2);
+    border-bottom: 2px solid rgb(128, 128, 128, 0.2);
     position: relative;
 }
 
@@ -130,7 +161,7 @@
     outline: none;
     min-height: 5vh;
     resize: none;
-    background-color: rgba(211, 211, 211, 0.888);
+    background-color: rgba(211, 211, 211, 0.5);
 }
 
 #send-msg-btn {
@@ -148,6 +179,8 @@
     height: 30px;
     z-index: -1;
 }
+
+/* To hide/show elements */
 
 .hidden {
     display: none;

@@ -47,6 +47,12 @@ public class ChatMessageController {
         return chatMessagesRegistry.getChatMessageRegistry();
     }
 
+    @MessageMapping("/chat.getPublicMessages")
+    @SendTo("/topic/previous")
+    public List<ChatMessage> getPublicMessages() {
+        return chatMessagesRegistry.getChatMessageRegistry();
+    }
+
     @MessageMapping("/chat.checkIfUnique")
     @SendTo("/topic/continue")
     public boolean isUserUnique(@Payload String userName) {
