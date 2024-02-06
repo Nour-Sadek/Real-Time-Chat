@@ -46,7 +46,7 @@ public class WebSocketEventListener {
             String userName = userSessionRegistry.getUserForSession(sessionId).getUserName();
 
             // Send a message to "/topic/addOnlineUser" to add all users except current one to list of online users in UI
-            messagingTemplate.convertAndSend("/topic/addOnlineUser", userSessionRegistry.getAllUsers());
+            messagingTemplate.convertAndSend("/topic/addOnlineUser", userSessionRegistry.getAllUserNames());
         }
 
     }

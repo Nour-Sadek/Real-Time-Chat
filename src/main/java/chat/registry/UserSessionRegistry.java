@@ -11,12 +11,12 @@ import java.util.*;
 public class UserSessionRegistry {
 
     private final Map<String, User> userSessionMap = new ConcurrentHashMap<>();
-    private final List<String> allUsers = new ArrayList<>();
+    private final List<User> allUsers = new ArrayList<>();
 
     public void registerUserSession(User user, String sessionId) {
 
         userSessionMap.put(sessionId, user);
-        allUsers.add(user.getUserName());
+        allUsers.add(user);
 
     }
 
@@ -35,13 +35,18 @@ public class UserSessionRegistry {
     public String removeSession(String session) {
 
         String disconnectedUser = getUserForSession(session).getUserName();
-        allUsers.remove(disconnectedUser);
+        allUsers.remove(getUserForSession(session));
         userSessionMap.remove(session);
 
         return disconnectedUser;
     }
     public boolean hasUser(String userName) {
-        return allUsers.contains(userName);
+
+        for (User user: allUsers) {
+            if (user.getUserName().equals(userName)) return true;
+        }
+
+        return false;
     }
 
     public String toString() {
@@ -56,8 +61,15 @@ public class UserSessionRegistry {
         return userSessionMap.isEmpty();
     }
 
-    public List<String> getAllUsers() {
+    public List<User> getAllUsers() {
         return allUsers;
+    }
+    public List<String> getAllUserNames() {
+        List<String> allUserNames = new ArrayList<>();
+        for (User user: allUsers) {
+            allUserNames.add(user.getUserName());
+        }
+        return allUserNames;
     }
 
 }
