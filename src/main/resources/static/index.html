@@ -12,24 +12,30 @@
     <!-- Login page -->
     <div id="login-page">
         <div id="login-page-container">
-            <input id="input-username" type="text" maxlength="20" placeholder="Enter username..."/>
+            <input id="input-username" type="text"/>
             <div id="existent-username-alert" class="hidden"> This username has already been taken <br> Please choose another one </div>
             <button id="send-username-btn"> Send </button>
         </div>
     </div>
 
-    <!-- Main Chat room -->
+    <!-- Main Chat Room -->
     <div id="main-body" class="hidden">
 
-        <!-- Area where previously-sent messages appear -->
-        <div id="messages">
+        <!-- Users -->
+        <div id="users"></div>
 
-        </div>
+        <!-- Chat -->
+        <div id="chat">
 
-        <!-- Area where messages are entered and sent -->
-        <div id="send-msg-area">
-            <textarea id="input-msg" placeholder="Type a message"> </textarea>
-            <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
+            <!-- Area where previously-sent messages appear -->
+            <div id="messages"></div>
+
+            <!-- Area where messages are entered and sent -->
+            <div id="send-msg-area">
+                <input id="input-msg"></input>
+                <button id="send-msg-btn"> <img src="images/button.jpg" alt="Send Message Button" id="send-msg-img"> </button>
+            </div>
+
         </div>
 
     </div>

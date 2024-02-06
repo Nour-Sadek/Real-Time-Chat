@@ -4,10 +4,12 @@
     box-sizing: border-box;
 }
 
-#main-body {
+.main-chat-room {
     width: 95vw;
     height: 95vh;
     margin: 20px auto;
+    display: flex;
+    justify-content: space-between;
 }
 
 /* Styling of area where the user registers */
@@ -17,7 +19,6 @@
     height: 100vh;
     background-color: antiquewhite;
     border: 2px solid black;
-    position: relaive;
 }
 
 #login-page-container {
@@ -53,11 +54,31 @@
     color: red;
 }
 
-.hidden {
-    display: none;
+/* Styling of area where users are shown */
+
+#users {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    flex-basis: 25vw;
+    border: 2px solid rgb(128, 128, 128, 0.2);
+}
+
+.user {
+    height: auto;
+    vertical-align: middle;
+    padding: 15px;
+    border-bottom: 2px solid rgb(128, 128, 128, 0.2);
+    background-color: rgb(243, 243, 243, 0.5);
+    color: rgb(89, 89, 89);
+
 }
 
 /* Styling of area where messages are displayed */
+
+#chat {
+    flex-grow: 2;
+}
 
 #messages {
     display: flex;
@@ -65,13 +86,12 @@
     padding-top: 0;
     flex-direction: column;
     border: 2px solid rgb(128, 128, 128, 0.2);
-    width: inherit;
     height: 87.5vh;
     overflow-y: scroll;
 }
 
 .message-container {
-    padding: 10px;
+    padding: 10px 10px 10px 0px;
     border-top: 2px solid rgb(128, 128, 128, 0.2);
     position: relative;
 }
@@ -96,13 +116,11 @@
 /* Styling of area where messages are sent */
 
 #send-msg-area {
-    position: fixed;
     width: inherit;
     min-height: 7.5vh;
-    bottom: 2.5vh;
     padding: 1vh;
     display: flex;
-    border: 2px solid rgb(128, 128, 128, 0.2);
+    border: 1px solid rgb(128, 128, 128, 0.2);
 }
 
 #input-msg {
@@ -129,4 +147,8 @@
     width: 30px;
     height: 30px;
     z-index: -1;
+}
+
+.hidden {
+    display: none;
 }
