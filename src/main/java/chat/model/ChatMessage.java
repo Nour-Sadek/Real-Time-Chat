@@ -8,6 +8,15 @@ public class ChatMessage {
     private String content;
     private LocalDateTime timeCreated;
     private String sender;
+    private String receiver;
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
 
     public String getContent() {
         return content;
