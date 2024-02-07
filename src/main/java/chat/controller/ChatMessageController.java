@@ -9,19 +9,22 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class ChatMessageController {
 
     private final UserSessionRegistry userSessionRegistry;
+    private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessagesRegistry chatMessagesRegistry;
 
     @Autowired
-    public ChatMessageController(UserSessionRegistry userSessionRegistry, ChatMessagesRegistry chatMessagesRegistry) {
+    public ChatMessageController(UserSessionRegistry userSessionRegistry, SimpMessagingTemplate messagingTemplate, ChatMessagesRegistry chatMessagesRegistry) {
         this.userSessionRegistry = userSessionRegistry;
+        this.messagingTemplate = messagingTemplate;
         this.chatMessagesRegistry = chatMessagesRegistry;
     }
 
@@ -35,6 +38,22 @@ public class ChatMessageController {
         chatMessage.setSender(sender.getUserName());
 
         return chatMessage;
+    }
+
+    @MessageMapping("/chat.sendPrivateMessage")
+    public void sendPrivateMessage(@Payload ChatMessage chatMessage,
+                                   @Header("simpSessionId") String sessionId) {
+
+        chatMessagesRegistry.registerChatMessage(chatMessage);
+        User sender = userSessionRegistry.getUserForSession(sessionId);
+        chatMessage.setSender(sender.getUserName());
+
+        // Send a message to "/topic/{sender}_{receiver}" to add new private message
+        String destination1 = "/topic/" + sender.getUserName() + "_" + chatMessage.getReceiver();
+        messagingTemplate.convertAndSend(destination1, chatMessage);
+        String destination2 = "/topic/" + chatMessage.getReceiver() + "_" + sender.getUserName();
+        messagingTemplate.convertAndSend(destination2, chatMessage);
+
     }
 
     @MessageMapping("/chat.addUser")
@@ -57,5 +76,22 @@ public class ChatMessageController {
     @SendTo("/topic/continue")
     public boolean isUserUnique(@Payload String userName) {
         return !userSessionRegistry.hasUser(userName);
+    }
+
+    @MessageMapping("/chat.getPrivateMessages")
+    @SendTo("/topic/privateMessages")
+    public List<ChatMessage> getPrivateMessages(@Payload ChatMessage bothChatters) {
+        List<ChatMessage> privateMessages = new ArrayList<>();
+        List<String> twoUsers = new ArrayList<>();
+        twoUsers.add(bothChatters.getSender());
+        twoUsers.add(bothChatters.getReceiver());
+        for (ChatMessage message: chatMessagesRegistry.getChatMessageRegistry()) {
+            String sender = message.getSender();
+            String receiver = message.getReceiver();
+            if (twoUsers.contains(sender) && twoUsers.contains(receiver)) {
+                privateMessages.add(message);
+            }
+        }
+        return privateMessages;
     }
 }

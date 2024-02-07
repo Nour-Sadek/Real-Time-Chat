@@ -11,9 +11,16 @@ const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "August",
 
 var stompClient = null;
 var username = null;
+var otherChatter = null;
 var subscribeObject = null;
 var subscribeObjectLogin = null;
 var publicTopicSubscribeObject = null;
+var privateMessagesObject = null;
+var privateSubscriptions = [];
+
+function isSubscribedToTopic(topic) {
+    return client.subscriptions.some(sub => sub.id === subscription.id && sub.destination === topic);
+}
 
 // Add an Event Listener to the publicChatButton
 publicChatButton.addEventListener("click", function(e) {
@@ -45,6 +52,8 @@ publicChatButton.addEventListener("click", function(e) {
             el.classList.add("dorment-chat");
         }
     });
+
+    otherChatter = null;
 
 });
 
@@ -85,6 +94,14 @@ function onMessageReceived(payload) {
     addMessageToChat(message);
 }
 
+function sendPrivateMessage(payload) {
+    let message = JSON.parse(payload.body);
+    let array = [message.sender, message.receiver];
+    if (array.includes(username) && array.includes(otherChatter)) {
+        addMessageToChat(message);
+    }
+}
+
 function sendMessage(event) {
 
     // Check if there is text in textarea and do nothing if it is empty
@@ -94,16 +111,22 @@ function sendMessage(event) {
     // If textArea was empty when button was pressed, do nothing
     if (text.length != 0 && stompClient) {
 
-        let chatMessage = {
-            content: text,
-            timeCreated: new Date()
-        };
-
         // Make textArea empty again
         textArea.value = "";
 
-        // Alert other subscribers
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        let chatMessage = {
+            content: text,
+            timeCreated: new Date(),
+            receiver: otherChatter
+        };
+
+        if (otherChatter === null) { // We are in the Public Chat Room
+            // Alert other subscribers
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        } else { // We are in a private chat room
+            // Alert otherChatter
+            stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
+        }
 
     }
 
@@ -141,7 +164,9 @@ function populateUI(payload) {
 
     for (let i = 0; i < chatMessages.length; i++) {
         let message = chatMessages[i];
-        addMessageToChat(message);
+        if (message.receiver === null) { // Make sure only public messages are displayed
+            addMessageToChat(message);
+        }
     }
 
 }
@@ -157,6 +182,20 @@ function removeOnlineUser(payload) {
                 el.remove();
             }
         });
+    }
+
+}
+
+function populateWithPrivateMessages(payload) {
+
+    privateMessagesObject.unsubscribe();
+
+    let chatMessages = JSON.parse(payload.body);
+    messagesContainer.innerHTML = "";
+
+    for (let i = 0; i < chatMessages.length; i++) {
+        let message = chatMessages[i];
+        addMessageToChat(message);
     }
 
 }
@@ -197,6 +236,19 @@ function addOnlineUser(payload) {
                 chatWithLabel.innerHTML = this.innerHTML;
                 // Unsubscribe from the public topic
                 publicTopicSubscribeObject.unsubscribe();
+
+                otherChatter = this.textContent.trim();
+
+                // Populate messages page with previously sent private messages between the two users
+                privateMessagesObject = stompClient.subscribe("/topic/privateMessages", populateWithPrivateMessages);
+                stompClient.send("/app/chat.getPrivateMessages", {}, JSON.stringify({sender: username, receiver: otherChatter}));
+
+                // Create a topic whose subscribers are only the current user and the user whose button was pressed
+                let destination = "/topic/" + username + "_" + otherChatter;
+                if (!privateSubscriptions.includes(destination)) {
+                    stompClient.subscribe(destination, sendPrivateMessage);
+                    privateSubscriptions.push(destination);
+                }
             });
         }
     }
