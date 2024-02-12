@@ -63,26 +63,38 @@
 #users {
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
     border: 2px solid rgb(128, 128, 128, 0.2);
     height: 82.5vh;
+    overflow-y: scroll;
+}
+
+.user-container {
+    border-bottom: 2px solid rgb(128, 128, 128, 0.2);
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .user {
-    height: auto;
-    vertical-align: middle;
     padding: 15px;
-    border-bottom: 2px solid rgb(128, 128, 128, 0.2);
 }
 
-.user:hover {
+.new-message-counter {
+    color: rgb(50, 90, 213);
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.user-container:hover {
     border: 2px solid black;
+    cursor: default;
 }
 
 #public-chat-btn {
     width: 100%;
     min-height: 7.5vh;
-    border: 2px solid rgb(128, 128, 128, 0.2);;
+    border: 2px solid rgb(128, 128, 128, 0.2);
     cursor: pointer;
 }
 
@@ -99,7 +111,7 @@
 /* Styling of area where messages are displayed */
 
 .chatting {
-    height: 5vh;
+    min-height: 5vh;
     background-color: rgba(211, 211, 211, 0.5);
     vertical-align: middle;
     padding: 10px;
