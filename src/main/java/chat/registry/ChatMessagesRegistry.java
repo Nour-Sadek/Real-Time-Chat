@@ -18,12 +18,4 @@ public class ChatMessagesRegistry {
         return this.chatMessages;
     }
 
-    public List<ChatMessage> getMessagesBetweenTwoUsers(String sender, String receiver) {
-        List<ChatMessage> output = new ArrayList<>();
-        for (ChatMessage message: chatMessages) {
-            if (message.getSender().equals(sender) && Objects.equals(message.getReceiver(), receiver)) output.add(message);
-        }
-        return output;
-    }
-
 }
