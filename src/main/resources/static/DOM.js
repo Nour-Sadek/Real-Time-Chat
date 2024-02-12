@@ -45,7 +45,7 @@ publicChatButton.addEventListener("click", function(e) {
     publicChatButton.classList.add("active-chat");
 
     // Change the color of all online users to grey
-    let allUsersNodeList = document.querySelectorAll(".user");
+    let allUsersNodeList = document.querySelectorAll(".user-container");
     allUsersNodeList.forEach(el => {
         if (el.classList.contains("active-chat")) {
             el.classList.remove("active-chat");
@@ -98,7 +98,43 @@ function sendPrivateMessage(payload) {
     let message = JSON.parse(payload.body);
     let array = [message.sender, message.receiver];
     if (array.includes(username) && array.includes(otherChatter)) {
+        // Move the user who sent the message at the top of the receiver's list and the receiver at the top of the sender's list
+        let displayedUsers = users.getElementsByClassName("user-container");
+        let userContainerElement = null;
+        for (let i = 0; i < displayedUsers.length; i++) {
+            let userContainer = displayedUsers[i];
+            if (array.includes(userContainer.querySelector(".user").textContent.trim())) {
+                users.removeChild(userContainer);
+                users.insertBefore(userContainer, users.firstChild);
+                break;
+            }
+        }
+        // Add the message
         addMessageToChat(message);
+    } else {  // The receiver is not on the private chat, so new-message-counter needs to be updated
+        // Find the message.sender whose new-message-counter needs to be updated
+        let displayedUsers = users.getElementsByClassName("user-container");
+        let userContainerElement = null;
+        for (let i = 0; i < displayedUsers.length; i++) {
+            let userContainer = displayedUsers[i];
+            if (userContainer.querySelector(".user").textContent.trim() === message.sender) {
+                messageCounterElement = userContainer.querySelector(".new-message-counter");
+                userContainerElement = userContainer;
+                if (messageCounterElement.classList.contains("hidden")) {
+                    messageCounterElement.textContent = 1;
+                    messageCounterElement.classList.remove("hidden");
+                } else {
+                    messageCounterElement.textContent = parseInt(messageCounterElement.textContent) + 1;
+                }
+                break;
+            }
+        }
+        // Insert the user with the new message as the first
+        if (userContainerElement !== null) {
+            users.removeChild(userContainerElement);
+            users.insertBefore(userContainerElement, users.firstChild);
+        }
+
     }
 }
 
@@ -176,9 +212,9 @@ function removeOnlineUser(payload) {
     let disconnectedUser = payload.body;
 
     if (disconnectedUser) {
-        let allUsersNodeList = document.querySelectorAll(".user");
+        let allUsersNodeList = document.querySelectorAll(".user-container");
         allUsersNodeList.forEach(el => {
-            if (el.textContent.trim() == disconnectedUser) {
+            if (el.querySelector(".user").textContent.trim() == disconnectedUser) {
                 el.remove();
             }
         });
@@ -206,16 +242,32 @@ function addOnlineUser(payload) {
     connectedUsers = connectedUsers.filter(e => e !== username);
 
     if (connectedUsers.length != 0) {
-        users.innerHTML = "";
+        // Get all users already present on the page
+        let currentlyDisplayedUsers = [];
+        let displayedUsers = users.getElementsByClassName("user-container");
+        for (let i = 0; i < displayedUsers.length; i++) {
+            let userContainer = displayedUsers[i];
+            currentlyDisplayedUsers.push(userContainer.querySelector(".user").textContent.trim());
+        }
+        // Go over all connected users and display those that aren't currently displayed
         for (let i = 0; i < connectedUsers.length; i++) {
             let connectedUser = connectedUsers[i];
-            users.insertAdjacentHTML("beforeend", `<div class="user dorment-chat"> ${connectedUser} </div>`);
+            if (currentlyDisplayedUsers.includes(connectedUser)) {
+                continue;
+            }
+            users.insertAdjacentHTML("beforeend", `<div class="user-container dorment-chat"> <div class="user">${connectedUser}</div> <div class="new-message-counter hidden"> 0 </div> </div>`);
             let newlyAddedUser = users.lastChild;
+            // Create a topic whose subscribers are only the current user and the connectedUser
+            let destination = "/topic/" + username + "_" + connectedUser;
+            if (!privateSubscriptions.includes(destination)) {
+                stompClient.subscribe(destination, sendPrivateMessage);
+                privateSubscriptions.push(destination);
+            }
             newlyAddedUser.addEventListener("click", function (e) {
                 // Make the public messages container empty
                 messagesContainer.innerHTML = "";
                 // Make the color of all other online users grey
-                let allUsersNodeList = document.querySelectorAll(".user");
+                let allUsersNodeList = document.querySelectorAll(".user-container");
                 allUsersNodeList.forEach(el => {
                     if (el.classList.contains("active-chat")) {
                         el.classList.remove("active-chat");
@@ -233,22 +285,22 @@ function addOnlineUser(payload) {
                     this.classList.add("active-chat");
                 }
                 // Change the Chat-With label to the clicked user's username
-                chatWithLabel.innerHTML = this.innerHTML;
+                chatWithLabel.innerHTML = this.querySelector(".user").textContent.trim();
                 // Unsubscribe from the public topic
                 publicTopicSubscribeObject.unsubscribe();
 
-                otherChatter = this.textContent.trim();
+                otherChatter = this.querySelector(".user").textContent.trim();
+
+                // Hide the new-message-counter div and change its value to zero
+                if (!this.querySelector(".new-message-counter").classList.contains("hidden")) {
+                    this.querySelector(".new-message-counter").classList.add("hidden");
+                    this.querySelector(".new-message-counter").textContent = 0;
+                }
 
                 // Populate messages page with previously sent private messages between the two users
                 privateMessagesObject = stompClient.subscribe("/topic/privateMessages", populateWithPrivateMessages);
                 stompClient.send("/app/chat.getPrivateMessages", {}, JSON.stringify({sender: username, receiver: otherChatter}));
 
-                // Create a topic whose subscribers are only the current user and the user whose button was pressed
-                let destination = "/topic/" + username + "_" + otherChatter;
-                if (!privateSubscriptions.includes(destination)) {
-                    stompClient.subscribe(destination, sendPrivateMessage);
-                    privateSubscriptions.push(destination);
-                }
             });
         }
     }
